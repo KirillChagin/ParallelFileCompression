@@ -1,3 +1,6 @@
 /ParallelFileCompression/.vs
-/ParallelFileCompression/ParallelFileCompression/obj
-/ParallelFileCompression/ParallelFileCompression/bin
+*.suo
+*.user
+bin
+obj
+packages
