@@ -15,6 +15,16 @@ namespace CompressionLib.MultithreadedZip
             throw new NotImplementedException();
         }
 
+        protected override void WaitProcession()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void WaitWriteToDestination()
+        {
+            throw new NotImplementedException();
+        }
+
         protected override void ReadSource()
         {
             var readThread = new Thread(base.ReadSource);

@@ -13,7 +13,7 @@ namespace ZipThreading.Collections
 
         private readonly object _lock = new object();
 
-        private volatile bool _isExecutionAborted = false;
+        private volatile bool _isFillingComplete;
 
         public SimpleConcurrentQueue()
         {
@@ -25,6 +25,7 @@ namespace ZipThreading.Collections
             lock (_lock)
             {
                 _internalQueue.Enqueue(item);
+                Monitor.PulseAll(_lock);
             }
         }
 
@@ -32,7 +33,7 @@ namespace ZipThreading.Collections
         {
             lock (_lock)
             {
-                while (waitForResult && _internalQueue.Count == 0 && !_isExecutionAborted)
+                while (waitForResult && _internalQueue.Count == 0 && !_isFillingComplete)
                 {
                     Monitor.Wait(_lock);
                 }
@@ -48,11 +49,11 @@ namespace ZipThreading.Collections
             }
         }
 
-        public void AbortExecutions()
+        public void CompleteFilling()
         {
             lock (_lock)
             {
-                _isExecutionAborted = true;
+                _isFillingComplete = true;
                 Monitor.PulseAll(_lock);
             }
         }

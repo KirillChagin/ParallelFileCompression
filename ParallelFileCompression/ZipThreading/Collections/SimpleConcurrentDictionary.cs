@@ -9,7 +9,7 @@ namespace ZipThreading.Collections
 
         private readonly object _lock = new object();
 
-        private volatile bool _isExecutionAborted = false;
+        private volatile bool _isFillingComplete = false;
 
         public SimpleConcurrentDictionary()
         {
@@ -21,6 +21,7 @@ namespace ZipThreading.Collections
             lock (_lock)
             {
                 _internalDictionary.Add(key, value);
+                Monitor.PulseAll(_lock);
             }
         }
 
@@ -28,7 +29,7 @@ namespace ZipThreading.Collections
         {
             lock (_lock)
             {
-                while (waitForValue && !_internalDictionary.ContainsKey(key) && !_isExecutionAborted)
+                while (waitForValue && !_internalDictionary.ContainsKey(key) && !_isFillingComplete)
                 {
                     Monitor.Wait(_lock);
                 }
@@ -45,11 +46,11 @@ namespace ZipThreading.Collections
             }
         }
 
-        public void AbortExecutions()
+        public void CompleteFilling()
         {
             lock (_lock)
             {
-                _isExecutionAborted = true;
+                _isFillingComplete = true;
                 Monitor.PulseAll(_lock);
             }
         }

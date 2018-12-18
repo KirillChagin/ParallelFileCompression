@@ -43,5 +43,11 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CompressionLib\CompressionLib.csproj">
+      <Project>{b39f93f8-3064-4213-9217-ade803216314}</Project>
+      <Name>CompressionLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
