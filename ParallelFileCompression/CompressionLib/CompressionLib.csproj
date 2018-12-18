@@ -39,9 +39,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ICompressor.cs" />
-    <Compile Include="MultithreadedCompressor\MultithreadedCompressor.cs" />
+    <Compile Include="MultithreadedZip\Compressor.cs" />
+    <Compile Include="MultithreadedZip\ZipBase.cs" />
+    <Compile Include="ZipUtils.cs" />
+    <Compile Include="IZip.cs" />
+    <Compile Include="MultithreadedZip\MultithreadedZip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Collections\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ZipThreading\ZipThreading.csproj">
+      <Project>{26bccca2-b639-4306-95f1-16ec2d76370e}</Project>
+      <Name>ZipThreading</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

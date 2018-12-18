@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BC74BE21-2104-4307-B4A9-ADA656C52346}</ProjectGuid>
+    <ProjectGuid>{26BCCCA2-B639-4306-95F1-16EC2D76370E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SimpleThreadPool</RootNamespace>
-    <AssemblyName>SimpleThreadPool</AssemblyName>
+    <RootNamespace>ZipThreading</RootNamespace>
+    <AssemblyName>ZipThreading</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -39,7 +39,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SimpleThreadPool.cs" />
+    <Compile Include="CollectionProcessorThreadPool\CollectionProcessorCallBack.cs" />
+    <Compile Include="CollectionProcessorThreadPool\CollectionProcessorThreadPool.cs" />
+    <Compile Include="Collections\SimpleConcurrentDictionary.cs" />
+    <Compile Include="Collections\SimpleConcurrentQueue.cs" />
+    <Compile Include="MultithreadingUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

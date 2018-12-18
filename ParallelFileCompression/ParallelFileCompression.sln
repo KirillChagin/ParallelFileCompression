@@ -5,9 +5,9 @@ VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParallelFileCompression", "ParallelFileCompression\ParallelFileCompression.csproj", "{F1DE31D1-78A5-43AB-B2FA-0E2146A6BB6E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleThreadPool", "SimpleThreadPool\SimpleThreadPool.csproj", "{BC74BE21-2104-4307-B4A9-ADA656C52346}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompressionLib", "CompressionLib\CompressionLib.csproj", "{B39F93F8-3064-4213-9217-ADE803216314}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZipThreading", "ZipThreading\ZipThreading.csproj", "{26BCCCA2-B639-4306-95F1-16EC2D76370E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +19,14 @@ Global
 		{F1DE31D1-78A5-43AB-B2FA-0E2146A6BB6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1DE31D1-78A5-43AB-B2FA-0E2146A6BB6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1DE31D1-78A5-43AB-B2FA-0E2146A6BB6E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BC74BE21-2104-4307-B4A9-ADA656C52346}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BC74BE21-2104-4307-B4A9-ADA656C52346}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BC74BE21-2104-4307-B4A9-ADA656C52346}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BC74BE21-2104-4307-B4A9-ADA656C52346}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B39F93F8-3064-4213-9217-ADE803216314}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B39F93F8-3064-4213-9217-ADE803216314}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B39F93F8-3064-4213-9217-ADE803216314}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B39F93F8-3064-4213-9217-ADE803216314}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26BCCCA2-B639-4306-95F1-16EC2D76370E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26BCCCA2-B639-4306-95F1-16EC2D76370E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26BCCCA2-B639-4306-95F1-16EC2D76370E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26BCCCA2-B639-4306-95F1-16EC2D76370E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
