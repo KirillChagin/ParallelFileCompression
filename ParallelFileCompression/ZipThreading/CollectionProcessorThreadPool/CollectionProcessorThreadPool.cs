@@ -5,8 +5,15 @@ using ZipThreading.Collections;
 
 namespace ZipThreading.CollectionProcessorThreadPool
 {
+    /// <summary>
+    /// Represents a simple threadpool-like collection processor
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class CollectionProcessorThreadPool<T>
     {
+        /// <summary>
+        /// The <i>maximum</i> number of threads in a pool
+        /// </summary>
         public static int OptimalThreadsCount => Environment.ProcessorCount;
 
         private readonly SimpleConcurrentQueue<T> _processingQueue;
@@ -17,10 +24,19 @@ namespace ZipThreading.CollectionProcessorThreadPool
 
         private WaitHandle[] _waitHandles;
 
+        /// <summary>
+        /// Initializes a new instance of the collection processor
+        /// </summary>
+        /// <param name="workItem">Callback for each thread, that processes collection item</param>
         public CollectionProcessorThreadPool(CollectionItemProcessorCallback<T> workItem) : this(workItem, null)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the collection processor
+        /// </summary>
+        /// <param name="workItem">Callback for each thread, that processes collection item</param>
+        /// <param name="processingQueue">Processing collection</param>
         public CollectionProcessorThreadPool(CollectionItemProcessorCallback<T> workItem, SimpleConcurrentQueue<T> processingQueue)
         {
             _processingQueue = processingQueue ?? new SimpleConcurrentQueue<T>();
@@ -31,6 +47,9 @@ namespace ZipThreading.CollectionProcessorThreadPool
         }
 
         //TODO: add threads when needed
+        /// <summary>
+        /// Starts all threads of the pool
+        /// </summary>
         public void StartPool()
         {
             for (var i = 0; i < OptimalThreadsCount; i++)
@@ -42,6 +61,9 @@ namespace ZipThreading.CollectionProcessorThreadPool
             }
         }
 
+        /// <summary>
+        /// Wait for all threads completed
+        /// </summary>
         public void WaitAll()
         {
             WaitHandle.WaitAll(_waitHandles);

@@ -1,11 +1,20 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using ZipThreading.CollectionProcessorThreadPool;
 
 namespace CompressionLib.MultithreadedZip
 {
+    /// <summary>
+    /// Exposes compression functionality
+    /// </summary>
     internal class Compressor : ZipBase
     {
+        /// <summary>
+        /// Initializes a new instance of a compressor
+        /// </summary>
+        /// <param name="sourceFile">Source file</param>
+        /// <param name="destinationFile">Destination file</param>
         public Compressor(FileInfo sourceFile, FileInfo destinationFile) : base(sourceFile, destinationFile)
         {
             OriginalBlockSize = ZipUtils.BufferSize;
@@ -13,6 +22,10 @@ namespace CompressionLib.MultithreadedZip
             OriginalLastBlockLength = OriginalBlockSize;
         }
 
+        /// <summary>
+        /// Compression of a block method that is used as callback for <see cref="CollectionProcessorThreadPool{T}"/>
+        /// </summary>
+        /// <param name="block">Processing block</param>
         protected override void ProcessBlock(ByteBlock block)
         {
             if (block == null)
@@ -41,6 +54,10 @@ namespace CompressionLib.MultithreadedZip
             
         }
 
+        /// <summary>
+        /// Reads of a source file
+        /// </summary>
+        /// <param name="fileInfo">Source file</param>
         protected override void ReadSource(FileInfo fileInfo)
         {
             var buffer = new byte[OriginalBlockSize];
@@ -75,6 +92,10 @@ namespace CompressionLib.MultithreadedZip
             
         }
 
+        /// <summary>
+        /// Writes to a destination file
+        /// </summary>
+        /// <param name="destinationFileInfo">Destination file</param>
         protected override void WriteToDestination(FileInfo destinationFileInfo)
         {
             try
@@ -108,6 +129,10 @@ namespace CompressionLib.MultithreadedZip
             
         }
 
+        /// <summary>
+        /// Write a header information of a compressed file to the start of a FileStream
+        /// </summary>
+        /// <param name="fileStream">File stream</param>
         private void WriteFileHeader(FileStream fileStream)
         {
             fileStream.Seek(0, SeekOrigin.Begin);

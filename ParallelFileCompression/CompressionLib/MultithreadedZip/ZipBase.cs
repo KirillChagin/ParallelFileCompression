@@ -6,6 +6,9 @@ using ZipThreading.Collections;
 
 namespace CompressionLib.MultithreadedZip
 {
+    /// <summary>
+    /// Base class for file compression an decompression
+    /// </summary>
     internal abstract class ZipBase : IDisposable
     {
         private readonly FileInfo _sourceFile;
@@ -21,7 +24,6 @@ namespace CompressionLib.MultithreadedZip
         private CollectionProcessorThreadPool<ByteBlock> _threadPool;
         private Thread _writeThread;
 
-
         protected ZipBase(FileInfo sourceFile, FileInfo destinationFile)
         {
             _sourceFile = sourceFile;
@@ -31,6 +33,9 @@ namespace CompressionLib.MultithreadedZip
             OutputBlocks = new SimpleConcurrentDictionary<int, byte[]>();
         }
 
+        /// <summary>
+        /// Start execution process
+        /// </summary>
         public void Start()
         {
             StartReadSource();
@@ -57,6 +62,10 @@ namespace CompressionLib.MultithreadedZip
             ReadSource(_sourceFile);
         }
 
+        /// <summary>
+        /// Reads of a source file
+        /// </summary>
+        /// <param name="fileInfo">Source file</param>
         protected abstract void ReadSource(FileInfo fileInfo);
 
         #endregion
@@ -69,6 +78,10 @@ namespace CompressionLib.MultithreadedZip
             _threadPool.StartPool();
         }
 
+        /// <summary>
+        /// Procession of a block method that is used as callback for <see cref="CollectionProcessorThreadPool{T}"/>
+        /// </summary>
+        /// <param name="block">Processing block</param>
         protected abstract void ProcessBlock(ByteBlock block);
 
         private void WaitProcession()
@@ -101,6 +114,10 @@ namespace CompressionLib.MultithreadedZip
             }
         }
 
+        /// <summary>
+        /// Writes to a destination file
+        /// </summary>
+        /// <param name="destinationFileInfo">Destination file</param>
         protected abstract void WriteToDestination(FileInfo destinationFileInfo);     
 
         private void WaitWriteToDestination()
