@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using CompressionLib.MultithreadedZip;
 
 namespace TestProject
@@ -18,13 +15,21 @@ namespace TestProject
         private static readonly string ssdFileNameMedium = @"C:\Projects\TestFiles\TestMedium.avi";
         private static readonly string hddFileNameMedium = @"D:\Projects\TestFiles\TestMedium.avi";
 
+        private static readonly string ssdFileNameExtraLarge = @"C:\Projects\TestFiles\TestExtraLarge.mkv";
+
+        private static readonly string ssdFileZero = @"C:\Projects\TestFiles\ZeroTest.txt";
+
         public static void Main()
         {
             //SmallTest();
 
-            MediumTest();
+            //MediumTest();
 
             //LargeTest();
+
+            //ExtraLargeTest();
+
+            ZeroTest();
 
             Console.ReadLine();
         }
@@ -74,7 +79,7 @@ namespace TestProject
             TestCompression("SSD", ssdFileNameLarge);
 
             //SSD decompression
-            //TestDecompression("SSD", ssdFileNameLarge);
+            TestDecompression("SSD", ssdFileNameLarge);
 
             //HDD compression
             //TestCompression("HDD", hddFileNameLarge);
@@ -85,6 +90,43 @@ namespace TestProject
             Console.WriteLine();
         }
 
+        private static void ExtraLargeTest()
+        {
+            Console.WriteLine("ExtraLarge file:");
+
+            //SSD compression
+            TestCompression("SSD", ssdFileNameExtraLarge);
+
+            //SSD decompression
+            TestDecompression("SSD", ssdFileNameExtraLarge);
+
+            //HDD compression
+            //TestCompression("HDD", hddFileNameLarge);
+
+            //HDD decompression
+            //TestDecompression("HDD", hddFileNameLarge);
+
+            Console.WriteLine();
+        }
+
+        private static void ZeroTest()
+        {
+            Console.WriteLine("Zero file:");
+
+            //SSD compression
+            TestCompression("SSD", ssdFileZero);
+
+            //SSD decompression
+            TestDecompression("SSD", ssdFileZero);
+
+            //HDD compression
+            //TestCompression("HDD", hddFileNameLarge);
+
+            //HDD decompression
+            //TestDecompression("HDD", hddFileNameLarge);
+
+            Console.WriteLine();
+        }
 
         private static void TestCompression(string diskType, string fileName)
         {

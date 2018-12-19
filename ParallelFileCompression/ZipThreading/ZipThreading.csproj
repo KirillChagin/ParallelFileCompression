@@ -43,7 +43,6 @@
     <Compile Include="CollectionProcessorThreadPool\CollectionProcessorThreadPool.cs" />
     <Compile Include="Collections\SimpleConcurrentDictionary.cs" />
     <Compile Include="Collections\SimpleConcurrentQueue.cs" />
-    <Compile Include="MultithreadingUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

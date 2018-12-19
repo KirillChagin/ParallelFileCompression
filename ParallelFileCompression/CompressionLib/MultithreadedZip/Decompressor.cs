@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 
@@ -18,78 +17,100 @@ namespace CompressionLib.MultithreadedZip
                 return; //TODO: throw?
             }
 
-            using (var memoryStream = new MemoryStream(block.Buffer))
+            try
             {
-                var decompressedBlock = block.IsLast ? new byte[OriginalLastBlockLength] : new byte[OriginalBlockSize];
-
-                using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+                using (var memoryStream = new MemoryStream(block.Buffer))
                 {
-                    gZipStream.Read(decompressedBlock, 0, decompressedBlock.Length);
-                }
+                    var decompressedBlock = block.IsLast ? new byte[OriginalLastBlockLength] : new byte[OriginalBlockSize];
 
-                OutputBlocks.Add(block.BlockNumber, decompressedBlock);
-                Trace.WriteLine("Block decompressed " + block.BlockNumber + " " + decompressedBlock.Length);
+                    using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+                    {
+                        gZipStream.Read(decompressedBlock, 0, decompressedBlock.Length);
+                    }
+
+                    OutputBlocks.Add(block.BlockNumber, decompressedBlock);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
 
         protected override void ReadSource(FileInfo fileInfo)
         {
-            using (var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+            try
             {
-                var blocksRead = 0;
-                long totalBytesRead = 0;
-                var compressedFileSize = fileInfo.Length;
-
-                ReadFileHeader(fileStream);
-                totalBytesRead += ZipUtils.FileHeaderSize;
-
-                while (true)
+                using (var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    var blockHeader = new byte[ZipUtils.BlockHeaderSize];
-                    var bytesRead = fileStream.Read(blockHeader, 0, ZipUtils.BlockHeaderSize);
-                    totalBytesRead += bytesRead;
+                    var blocksRead = 0;
+                    long totalBytesRead = 0;
+                    var compressedFileSize = fileInfo.Length;
 
-                    var blockLength = BitConverter.ToInt32(blockHeader, 0);
-                    var block = new byte[blockLength];
-                    bytesRead = fileStream.Read(block, 0, blockLength);
-                    totalBytesRead += bytesRead;
+                    ReadFileHeader(fileStream);
+                    totalBytesRead += ZipUtils.FileHeaderSize;
 
-                    if (compressedFileSize - totalBytesRead <= 0)
+                    while (true)
                     {
-                        InputBlocks.Enqueue(new ByteBlock(block, blocksRead, true));
-                        Trace.WriteLine("Blocks read " + blocksRead);
-                        break;
+                        var blockHeader = new byte[ZipUtils.BlockHeaderSize];
+                        var bytesRead = fileStream.Read(blockHeader, 0, ZipUtils.BlockHeaderSize);
+                        totalBytesRead += bytesRead;
+
+                        var blockLength = BitConverter.ToInt32(blockHeader, 0);
+                        var block = new byte[blockLength];
+                        bytesRead = fileStream.Read(block, 0, blockLength);
+                        totalBytesRead += bytesRead;
+
+                        if (compressedFileSize - totalBytesRead <= 0)
+                        {
+                            InputBlocks.Enqueue(new ByteBlock(block, blocksRead, true));
+                            break;
+                        }
+
+                        InputBlocks.Enqueue(new ByteBlock(block, blocksRead));
+                        blocksRead++;
                     }
 
-                    InputBlocks.Enqueue(new ByteBlock(block, blocksRead));
-                    Trace.WriteLine("Blocks read " + blocksRead);
-                    blocksRead++;
+                    InputBlocks.CompleteFilling();
                 }
-
-                InputBlocks.CompleteFilling();
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            
         }
 
         protected override void WriteToDestination(FileInfo destinationFileInfo)
         {
-            using (var fileStream = new FileStream(destinationFileInfo.FullName, FileMode.Create))
+            try
             {
-                var nextBlockNumber = 0;
-
-                while (true)
+                using (var fileStream = new FileStream(destinationFileInfo.FullName, FileMode.Create))
                 {
-                    var result = OutputBlocks.TryTakeAndRemove(nextBlockNumber, out var block, true);
+                    var nextBlockNumber = 0;
 
-                    if (!result)
+                    while (true)
                     {
-                        break;
-                    }
+                        var result = OutputBlocks.TryTakeAndRemove(nextBlockNumber, out var block, true);
 
-                    nextBlockNumber++;
-                    fileStream.Write(block, 0, block.Length);
-                    Trace.WriteLine("Blocks written " + (nextBlockNumber - 1));
+                        if (!result)
+                        {
+                            break;
+                        }
+
+                        nextBlockNumber++;
+                        fileStream.Write(block, 0, block.Length);
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            
         }
 
         private void ReadFileHeader(FileStream fileStream)

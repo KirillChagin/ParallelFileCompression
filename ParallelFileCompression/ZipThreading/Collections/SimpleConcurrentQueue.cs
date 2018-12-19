@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace ZipThreading.Collections
@@ -9,6 +10,8 @@ namespace ZipThreading.Collections
     /// <typeparam name="T"></typeparam>
     public sealed class SimpleConcurrentQueue<T>
     {
+        public int MaximumCapacity = Environment.ProcessorCount * 4;
+
         private readonly Queue<T> _internalQueue;
 
         private readonly object _lock = new object();
@@ -24,6 +27,12 @@ namespace ZipThreading.Collections
         {
             lock (_lock)
             {
+                //For ~constant memory usage
+                while (_internalQueue.Count >= MaximumCapacity)
+                {
+                    Monitor.Wait(_lock);
+                }
+
                 _internalQueue.Enqueue(item);
                 Monitor.PulseAll(_lock);
             }
@@ -45,6 +54,7 @@ namespace ZipThreading.Collections
                 }
 
                 result = _internalQueue.Dequeue();
+                Monitor.PulseAll(_lock);
                 return true;
             }
         }

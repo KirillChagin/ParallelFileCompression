@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using ZipThreading.CollectionProcessorThreadPool;
@@ -7,7 +6,7 @@ using ZipThreading.Collections;
 
 namespace CompressionLib.MultithreadedZip
 {
-    internal abstract class ZipBase
+    internal abstract class ZipBase : IDisposable
     {
         private readonly FileInfo _sourceFile;
         private readonly FileInfo _destinationFile;
@@ -90,7 +89,16 @@ namespace CompressionLib.MultithreadedZip
 
         private void WriteToDestination()
         {
-            WriteToDestination(_destinationFile);
+            try
+            {
+                WriteToDestination(_destinationFile);
+            }
+            catch (IOException e)
+            {
+                //TODO: probably delete file
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         protected abstract void WriteToDestination(FileInfo destinationFileInfo);     
@@ -101,5 +109,12 @@ namespace CompressionLib.MultithreadedZip
         }
 
         #endregion
+
+        public void Dispose()
+        {
+            //Just to collect memory after work
+            GC.Collect();
+            GC.SuppressFinalize(this);
+        }
     }
 }

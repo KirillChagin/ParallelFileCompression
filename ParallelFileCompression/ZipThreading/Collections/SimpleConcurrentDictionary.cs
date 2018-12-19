@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace ZipThreading.Collections
 {
     public sealed class SimpleConcurrentDictionary<TKey, TValue>
     {
+        public int MaximumCapacity = Environment.ProcessorCount * 4;
+
         private readonly Dictionary<TKey, TValue> _internalDictionary;
 
         private readonly object _lock = new object();
@@ -20,6 +23,12 @@ namespace ZipThreading.Collections
         {
             lock (_lock)
             {
+                //For ~constant memory usage
+                while (_internalDictionary.Count >= MaximumCapacity)
+                {
+                    Monitor.Wait(_lock);
+                }
+
                 _internalDictionary.Add(key, value);
                 Monitor.PulseAll(_lock);
             }
@@ -42,6 +51,7 @@ namespace ZipThreading.Collections
 
                 value = _internalDictionary[key];
                 _internalDictionary.Remove(key);
+                Monitor.PulseAll(_lock);
                 return true;
             }
         }

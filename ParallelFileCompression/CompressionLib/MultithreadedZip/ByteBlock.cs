@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace CompressionLib.MultithreadedZip
+﻿namespace CompressionLib.MultithreadedZip
 {
     internal class ByteBlock
     {

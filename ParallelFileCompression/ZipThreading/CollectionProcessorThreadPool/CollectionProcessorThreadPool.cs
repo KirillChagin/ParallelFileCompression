@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using ZipThreading.Collections;
 
@@ -6,6 +7,8 @@ namespace ZipThreading.CollectionProcessorThreadPool
 {
     public class CollectionProcessorThreadPool<T>
     {
+        public static int OptimalThreadsCount => Environment.ProcessorCount;
+
         private readonly SimpleConcurrentQueue<T> _processingQueue;
 
         private readonly CollectionItemProcessorCallback<T> _workItem;
@@ -13,10 +16,6 @@ namespace ZipThreading.CollectionProcessorThreadPool
         private List<Thread> _pool;
 
         private WaitHandle[] _waitHandles;
-
-        //private Thread _workItemScheduler;
-
-        //private int _currentThreadCount = 0;
 
         public CollectionProcessorThreadPool(CollectionItemProcessorCallback<T> workItem) : this(workItem, null)
         {
@@ -31,12 +30,10 @@ namespace ZipThreading.CollectionProcessorThreadPool
             InitPool();
         }
 
-
-        //TODO: clean pool.
         //TODO: add threads when needed
         public void StartPool()
         {
-            for (var i = 0; i < MultithreadingUtils.OptimalThreadsCount; i++)
+            for (var i = 0; i < OptimalThreadsCount; i++)
             {
                 var waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
                 _waitHandles[i] = waitHandle;
@@ -52,14 +49,14 @@ namespace ZipThreading.CollectionProcessorThreadPool
 
         private void InitPool()
         {
-            _pool = new List<Thread>(MultithreadingUtils.OptimalThreadsCount);
-            for (var i = 0; i < MultithreadingUtils.OptimalThreadsCount; i++)
+            _pool = new List<Thread>(OptimalThreadsCount);
+            for (var i = 0; i < OptimalThreadsCount; i++)
             {
                 var thread = new Thread(DispatchWorkItem);
                 _pool.Add(thread);
             }
 
-            _waitHandles = new WaitHandle[MultithreadingUtils.OptimalThreadsCount];
+            _waitHandles = new WaitHandle[OptimalThreadsCount];
         }
 
         private void DispatchWorkItem(object o)
@@ -81,37 +78,5 @@ namespace ZipThreading.CollectionProcessorThreadPool
                 }
             }
         }
-       
-        /*private void InitializeScheduler()
-        {
-            _workItemScheduler = new Thread(() =>
-            {
-                while (true)
-                {
-                    T collectionItem;
-                    lock (_queueLock)
-                    {
-                        //TODO: add exit point
-                        while (_processingQueue.Count == 0)
-                        {
-                            Monitor.Wait(_queueLock);
-                        }
-
-                        //collectionItem = _processingQueue.Dequeue();
-                    }
-
-
-                    DispatchWorkItem(collectionItem);
-                }
-            });
-
-            _workItemScheduler.Priority = ThreadPriority.AboveNormal;
-            _workItemScheduler.Start();
-        }
-
-        private void DispatchWorkItem(T collectionItem)
-        {
-            
-        }*/
     }
 }
