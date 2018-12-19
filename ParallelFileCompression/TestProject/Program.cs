@@ -36,7 +36,7 @@ namespace TestProject
             TestCompression("SSD", ssdFileNameSmall);
 
             //SSD decompression
-            //TestDecompression("SSD", ssdFileNameSmall);
+            TestDecompression("SSD", ssdFileNameSmall);
 
             //HDD compression
             //TestCompression("HDD", hddFileNameSmall);
@@ -55,7 +55,7 @@ namespace TestProject
             TestCompression("SSD", ssdFileNameMedium);
 
             //SSD decompression
-            //TestDecompression("SSD", ssdFileNameMedium);
+            TestDecompression("SSD", ssdFileNameMedium);
 
             //HDD compression
             //TestCompression("HDD", hddFileNameMedium);
@@ -104,9 +104,16 @@ namespace TestProject
         private static void TestDecompression(string diskType, string fileName)
         {
             var fileInfo = new FileInfo(fileName + ".gz");
+            var currentFileName = fileInfo.FullName;
+            var newFileName = currentFileName.Remove(fileInfo.FullName.Length - fileInfo.Extension.Length).Replace(".", "(1).");
+
+            var destFileInfo = new FileInfo(newFileName);
 
             Console.WriteLine("{0} decompression test started", diskType);
             var watch = System.Diagnostics.Stopwatch.StartNew();
+
+            var zip = new MultithreadedZip();
+            zip.Decompress(fileInfo, destFileInfo);
 
             watch.Stop();
             Console.WriteLine("{0} decompression test finished. Elapsed time {1}", diskType, watch.ElapsedMilliseconds);

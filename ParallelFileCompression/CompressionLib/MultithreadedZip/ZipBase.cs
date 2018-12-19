@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using ZipThreading.CollectionProcessorThreadPool;
 using ZipThreading.Collections;
 
 namespace CompressionLib.MultithreadedZip
@@ -13,6 +15,14 @@ namespace CompressionLib.MultithreadedZip
         protected readonly SimpleConcurrentQueue<ByteBlock> InputBlocks;
         protected readonly SimpleConcurrentDictionary<int, byte[]> OutputBlocks;
 
+        protected long OriginalFileSize;
+        protected int OriginalBlockSize;
+        protected int OriginalLastBlockLength;
+
+        private CollectionProcessorThreadPool<ByteBlock> _threadPool;
+        private Thread _writeThread;
+
+
         protected ZipBase(FileInfo sourceFile, FileInfo destinationFile)
         {
             _sourceFile = sourceFile;
@@ -24,73 +34,72 @@ namespace CompressionLib.MultithreadedZip
 
         public void Start()
         {
-            ReadSource();
+            StartReadSource();
 
             StartProcession();
 
-            WriteToDestination();
+            StartWriteToDestination();
 
             WaitProcession();
 
             WaitWriteToDestination();
         }
 
-        protected virtual void ReadSource()
+        #region Reading
+
+        private void StartReadSource()
         {
-            var buffer = new byte[ZipUtils.BufferSize];
-
-            using (var fileStream = new FileStream(_sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, ZipUtils.BufferSize))
-            {
-                int bytesRead;
-                var blocksRead = 0;
-                while ((bytesRead = fileStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    if (bytesRead <= ZipUtils.BufferSize)
-                    {
-                        var lessBuffer = new byte[bytesRead];
-                        Array.Copy(buffer, lessBuffer, lessBuffer.Length);
-                        InputBlocks.Enqueue(new ByteBlock(lessBuffer, blocksRead));
-                    }
-                    else
-                    {
-                        InputBlocks.Enqueue(new ByteBlock(buffer, blocksRead));
-                    }
-
-                    Trace.WriteLine("Blocks read " + blocksRead);
-                    blocksRead++;
-                }
-
-                InputBlocks.CompleteFilling();
-            }
+            var readThread = new Thread(ReadSource);
+            readThread.Start();
         }
 
-        protected virtual void WriteToDestination()
+        private void ReadSource()
         {
-            //TODO: convert fileName (add extension if it is incorrect)
-            using (var fileStream = new FileStream(_destinationFile.FullName, FileMode.Create))
-            {
-                var nextBlockNumber = 0;
-                while (true)
-                {
-                    var result = OutputBlocks.TryTakeAndRemove(nextBlockNumber, out var block, true);
-
-                    if (!result)
-                    {
-                        break;
-                    }
-
-                    nextBlockNumber++;
-                    fileStream.Write(block, 0, block.Length);
-
-                    Trace.WriteLine("Blocks written " + (nextBlockNumber - 1));
-                }
-            }
+            ReadSource(_sourceFile);
         }
 
-        protected abstract void StartProcession();
+        protected abstract void ReadSource(FileInfo fileInfo);
 
-        protected abstract void WaitProcession();
+        #endregion
 
-        protected abstract void WaitWriteToDestination();
+        #region Processing
+
+        private void StartProcession()
+        {
+            _threadPool = new CollectionProcessorThreadPool<ByteBlock>(ProcessBlock, InputBlocks);
+            _threadPool.StartPool();
+        }
+
+        protected abstract void ProcessBlock(ByteBlock block);
+
+        private void WaitProcession()
+        {
+            _threadPool.WaitAll();
+            OutputBlocks.CompleteFilling();
+        }
+
+        #endregion
+
+        #region Writing
+
+        private void StartWriteToDestination()
+        {
+            _writeThread = new Thread(WriteToDestination);
+            _writeThread.Start();
+        }
+
+        private void WriteToDestination()
+        {
+            WriteToDestination(_destinationFile);
+        }
+
+        protected abstract void WriteToDestination(FileInfo destinationFileInfo);     
+
+        private void WaitWriteToDestination()
+        {
+            _writeThread.Join();
+        }
+
+        #endregion
     }
 }
