@@ -24,6 +24,11 @@ namespace CompressionLib.MultithreadedZip
         private CollectionProcessorThreadPool<ByteBlock> _threadPool;
         private Thread _writeThread;
 
+        protected bool IsAborted;
+
+        public bool Success { get; protected set; }
+        public string ErrorMessage { get; protected set; }
+        
         protected ZipBase(FileInfo sourceFile, FileInfo destinationFile)
         {
             _sourceFile = sourceFile;
@@ -47,6 +52,14 @@ namespace CompressionLib.MultithreadedZip
             WaitProcession();
 
             WaitWriteToDestination();
+
+            if (IsAborted && File.Exists(_destinationFile.FullName))
+            {
+                File.Delete(_destinationFile.FullName);
+                return;
+            }
+
+            Success = true;
         }
 
         #region Reading
@@ -59,7 +72,15 @@ namespace CompressionLib.MultithreadedZip
 
         private void ReadSource()
         {
-            ReadSource(_sourceFile);
+            try
+            {
+                ReadSource(_sourceFile);
+            }
+            catch (Exception e)
+            {
+                ErrorMessage = $"Error occured while reading the file {_sourceFile.FullName}. {e.Message}";
+                Abort();
+            }
         }
 
         /// <summary>
@@ -74,7 +95,19 @@ namespace CompressionLib.MultithreadedZip
 
         private void StartProcession()
         {
-            _threadPool = new CollectionProcessorThreadPool<ByteBlock>(ProcessBlock, InputBlocks);
+            _threadPool = new CollectionProcessorThreadPool<ByteBlock>(block =>
+            {
+                try
+                {
+                    ProcessBlock(block);
+                }
+                catch (Exception e)
+                {
+                    ErrorMessage = $"Error occured while compressing(decompressing) the file. {e.Message}";
+                    Abort();
+                }
+            }, InputBlocks);
+
             _threadPool.StartPool();
         }
 
@@ -106,11 +139,10 @@ namespace CompressionLib.MultithreadedZip
             {
                 WriteToDestination(_destinationFile);
             }
-            catch (IOException e)
+            catch (Exception e)
             {
-                //TODO: probably delete file
-                Console.WriteLine(e);
-                throw;
+                ErrorMessage = $"Error occured while writing to the file: {_destinationFile.FullName} {e.Message}";
+                Abort();
             }
         }
 
@@ -126,6 +158,13 @@ namespace CompressionLib.MultithreadedZip
         }
 
         #endregion
+
+        public void Abort()
+        {
+            IsAborted = true;
+            InputBlocks.Flush();
+            OutputBlocks.Flush();
+        }
 
         public void Dispose()
         {

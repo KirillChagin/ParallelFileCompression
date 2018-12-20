@@ -24,6 +24,8 @@ namespace ZipThreading.CollectionProcessorThreadPool
 
         private WaitHandle[] _waitHandles;
 
+        private bool _isStopped;
+
         /// <summary>
         /// Initializes a new instance of the collection processor
         /// </summary>
@@ -46,9 +48,9 @@ namespace ZipThreading.CollectionProcessorThreadPool
             InitPool();
         }
 
-        //TODO: add threads when needed
+        //TODO: add threads when needed = change waiting mechanism
         /// <summary>
-        /// Starts all threads of the pool
+        /// Starts all threads in the pool
         /// </summary>
         public void StartPool()
         {
@@ -83,7 +85,7 @@ namespace ZipThreading.CollectionProcessorThreadPool
 
         private void DispatchWorkItem(object o)
         {
-            while (true)
+            while (!_isStopped)
             {
                 var dequeueResult = _processingQueue.TryDequeue(out var collectionItem, true);
 

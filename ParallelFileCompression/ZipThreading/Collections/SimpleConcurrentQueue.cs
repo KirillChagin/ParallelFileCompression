@@ -87,5 +87,18 @@ namespace ZipThreading.Collections
                 Monitor.PulseAll(_lock);
             }
         }
+
+        /// <summary>
+        /// Force stop and clear
+        /// </summary>
+        public void Flush()
+        {
+            lock (_lock)
+            {
+                _isFillingComplete = true;
+                _internalQueue.Clear();
+                Monitor.PulseAll(_lock);
+            }
+        }
     }
 }

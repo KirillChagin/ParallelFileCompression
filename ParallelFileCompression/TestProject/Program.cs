@@ -21,7 +21,16 @@ namespace TestProject
 
         public static void Main()
         {
-            //SmallTest();
+            try
+            {
+                SmallTest();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            
 
             //MediumTest();
 
@@ -29,7 +38,7 @@ namespace TestProject
 
             //ExtraLargeTest();
 
-            ZeroTest();
+            //ZeroTest();
 
             Console.ReadLine();
         }

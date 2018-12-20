@@ -7,6 +7,8 @@ namespace CompressionLib.MultithreadedZip
     /// </summary>
     public sealed class MultithreadedZip : IZip
     {
+        private ZipBase _processor;
+
         /// <summary>
         /// Compress a file
         /// </summary>
@@ -15,9 +17,9 @@ namespace CompressionLib.MultithreadedZip
         public void Compress(FileInfo compressSourceFile, FileInfo compressDestinationFile = null)
         {
             //TODO: check destination or create new name
-            using (var compressor = new Compressor(compressSourceFile, compressDestinationFile))
+            using (_processor = new Compressor(compressSourceFile, compressDestinationFile))
             {
-                compressor.Start();
+                _processor.Start();
             }         
         }
 
@@ -29,10 +31,28 @@ namespace CompressionLib.MultithreadedZip
         public void Decompress(FileInfo decompressSourceFile, FileInfo decompressDestinationFile = null)
         {
             //TODO: check destination or create new name
-            using (var decompressor = new Decompressor(decompressSourceFile, decompressDestinationFile))
+            using (_processor = new Decompressor(decompressSourceFile, decompressDestinationFile))
             {
-                decompressor.Start();
+                _processor.Start();
             }            
         }
+
+        /// <summary>
+        /// Abort execution
+        /// </summary>
+        public void Abort()
+        {
+            _processor.Abort();
+        }
+
+        /// <summary>
+        /// Indicates successful execution complete
+        /// </summary>
+        public bool Success => _processor.Success;
+
+        /// <summary>
+        /// Error message. Null if execution succeed
+        /// </summary>
+        public string ErrorMessage => _processor.ErrorMessage;
     }
 }

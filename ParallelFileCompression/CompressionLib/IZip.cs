@@ -20,5 +20,20 @@ namespace CompressionLib
         /// <param name="decompressSourceFile">Source of a compressed file</param>
         /// <param name="decompressDestinationFile">Destination of a decompressed file</param>
         void Decompress(FileInfo decompressSourceFile, FileInfo decompressDestinationFile = null);
+
+        /// <summary>
+        /// Abort execution
+        /// </summary>
+        void Abort();
+
+        /// <summary>
+        /// Indicates successful execution complete
+        /// </summary>
+        bool Success { get; }
+
+        /// <summary>
+        /// Error message. Null if execution succeed
+        /// </summary>
+        string ErrorMessage { get; }
     }
 }

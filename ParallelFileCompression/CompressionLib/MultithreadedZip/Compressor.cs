@@ -19,7 +19,7 @@ namespace CompressionLib.MultithreadedZip
         {
             OriginalBlockSize = ZipUtils.BufferSize;
             OriginalFileSize = sourceFile.Length;
-            OriginalLastBlockLength = OriginalBlockSize;
+            OriginalLastBlockLength = 0;
         }
 
         /// <summary>
@@ -28,30 +28,21 @@ namespace CompressionLib.MultithreadedZip
         /// <param name="block">Processing block</param>
         protected override void ProcessBlock(ByteBlock block)
         {
-            if (block == null)
+            if (block == null || IsAborted)
             {
-                return; //TODO: throw?
+                return;
             }
 
-            try
+            using (var memoryStream = new MemoryStream())
             {
-                using (var memoryStream = new MemoryStream())
+                using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress))
                 {
-                    using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress))
-                    {
-                        gZipStream.Write(block.Buffer, 0, block.Buffer.Length);
-                    }
-
-                    var compressedBlock = memoryStream.ToArray().AddByteBlockLengthHeader();
-                    OutputBlocks.Add(block.BlockNumber, compressedBlock);
+                    gZipStream.Write(block.Buffer, 0, block.Buffer.Length);
                 }
+
+                var compressedBlock = memoryStream.ToArray().AddByteBlockLengthHeader();
+                OutputBlocks.Add(block.BlockNumber, compressedBlock);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-            
         }
 
         /// <summary>
@@ -62,34 +53,25 @@ namespace CompressionLib.MultithreadedZip
         {
             var buffer = new byte[OriginalBlockSize];
 
-            try
+            using (var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                using (var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                int bytesRead;
+                var blocksRead = 0;
+                while ((bytesRead = fileStream.Read(buffer, 0, buffer.Length)) > 0 && !IsAborted)
                 {
-                    int bytesRead;
-                    var blocksRead = 0;
-                    while ((bytesRead = fileStream.Read(buffer, 0, buffer.Length)) > 0)
+                    if (bytesRead < OriginalBlockSize)
                     {
-                        if (bytesRead < OriginalBlockSize)
-                        {
-                            OriginalLastBlockLength = bytesRead;
-                        }
-
-                        var blockBuffer = new byte[bytesRead];
-                        Array.Copy(buffer, blockBuffer, blockBuffer.Length);
-                        InputBlocks.Enqueue(new ByteBlock(blockBuffer, blocksRead));
-                        blocksRead++;
+                        OriginalLastBlockLength = bytesRead;
                     }
 
-                    InputBlocks.CompleteFilling();
+                    var blockBuffer = new byte[bytesRead];
+                    Array.Copy(buffer, blockBuffer, blockBuffer.Length);
+                    InputBlocks.Enqueue(new ByteBlock(blockBuffer, blocksRead));
+                    blocksRead++;
                 }
+
+                InputBlocks.CompleteFilling();
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-            
         }
 
         /// <summary>
@@ -98,35 +80,26 @@ namespace CompressionLib.MultithreadedZip
         /// <param name="destinationFileInfo">Destination file</param>
         protected override void WriteToDestination(FileInfo destinationFileInfo)
         {
-            try
+            using (var fileStream = new FileStream(destinationFileInfo.FullName, FileMode.Create))
             {
-                using (var fileStream = new FileStream(destinationFileInfo.FullName, FileMode.Create))
+                fileStream.Position = ZipUtils.FileHeaderSize;
+                var nextBlockNumber = 0;
+
+                while (!IsAborted)
                 {
-                    fileStream.Position = ZipUtils.FileHeaderSize;
-                    var nextBlockNumber = 0;
+                    var result = OutputBlocks.TryTakeAndRemove(nextBlockNumber, out var block, true);
 
-                    while (true)
+                    if (!result)
                     {
-                        var result = OutputBlocks.TryTakeAndRemove(nextBlockNumber, out var block, true);
-
-                        if (!result)
-                        {
-                            break;
-                        }
-
-                        nextBlockNumber++;
-                        fileStream.Write(block, 0, block.Length);
+                        break;
                     }
 
-                    WriteFileHeader(fileStream);
+                    nextBlockNumber++;
+                    fileStream.Write(block, 0, block.Length);
                 }
+
+                WriteFileHeader(fileStream);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-            
         }
 
         /// <summary>

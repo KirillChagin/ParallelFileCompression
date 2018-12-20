@@ -5,7 +5,7 @@ namespace CompressionLib
     internal static class ZipUtils
     {
         /// <summary>
-        /// Size of the block for reading uncompressed file
+        /// Size of the block for reading an uncompressed file
         /// </summary>
         public static readonly int BufferSize = 1 * 1024 * 1024;
 
@@ -18,11 +18,6 @@ namespace CompressionLib
         /// Size of the compressed file's header
         /// </summary>
         public static readonly int FileHeaderSize = sizeof(long) + 2 * sizeof(int); //file length, block length, last block length
-
-        /// <summary>
-        /// Default file extension of a compressed file
-        /// </summary>
-        public static readonly string ZipExtension = ".gz";
 
         //TODO: better move to another class
         /// <summary>
