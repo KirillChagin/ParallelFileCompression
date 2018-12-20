@@ -16,7 +16,6 @@ namespace CompressionLib.MultithreadedZip
         /// <param name="compressDestinationFile">destination for the compressed file</param>
         public void Compress(FileInfo compressSourceFile, FileInfo compressDestinationFile = null)
         {
-            //TODO: check destination or create new name
             using (_processor = new Compressor(compressSourceFile, compressDestinationFile))
             {
                 _processor.Start();
@@ -30,7 +29,6 @@ namespace CompressionLib.MultithreadedZip
         /// <param name="decompressDestinationFile">Destination of a decompressed file</param>
         public void Decompress(FileInfo decompressSourceFile, FileInfo decompressDestinationFile = null)
         {
-            //TODO: check destination or create new name
             using (_processor = new Decompressor(decompressSourceFile, decompressDestinationFile))
             {
                 _processor.Start();

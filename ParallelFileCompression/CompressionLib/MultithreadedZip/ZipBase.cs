@@ -129,7 +129,10 @@ namespace CompressionLib.MultithreadedZip
 
         private void StartWriteToDestination()
         {
-            _writeThread = new Thread(WriteToDestination);
+            _writeThread = new Thread(WriteToDestination)
+            {
+                Priority = ThreadPriority.AboveNormal //Important for slow disks. Otherwise output collection can grow very fast
+            };
             _writeThread.Start();
         }
 

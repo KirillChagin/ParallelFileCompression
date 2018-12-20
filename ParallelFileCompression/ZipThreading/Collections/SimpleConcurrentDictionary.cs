@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 
 namespace ZipThreading.Collections
 {
     public sealed class SimpleConcurrentDictionary<TKey, TValue>
     {
-        /// <summary>
-        /// The maximum number of pairs that could be stored in the dictionary at one time
-        /// </summary>
-        public int MaximumCapacity = Environment.ProcessorCount * 4;
+        private readonly int PreferredCount = 256;
 
         private readonly Dictionary<TKey, TValue> _internalDictionary;
 
         private readonly object _lock = new object();
 
-        private volatile bool _isFillingComplete = false;
+        private volatile bool _isFillingComplete;
 
         /// <summary>
         /// Initializes a new instance of a thread-safe wrapper for a <see cref="Dictionary{TKey,TValue}"/>. 
@@ -34,10 +30,9 @@ namespace ZipThreading.Collections
         {
             lock (_lock)
             {
-                //For ~constant memory usage
-                while (_internalDictionary.Count >= MaximumCapacity)
+                if (_internalDictionary.Count >= PreferredCount)
                 {
-                    Monitor.Wait(_lock);
+                    Monitor.Wait(_lock, 30); //Important for slow disks. Give a chance to threads that take elements.
                 }
 
                 _internalDictionary.Add(key, value);

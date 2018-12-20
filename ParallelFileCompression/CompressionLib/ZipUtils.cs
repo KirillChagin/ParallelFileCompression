@@ -19,7 +19,6 @@ namespace CompressionLib
         /// </summary>
         public static readonly int FileHeaderSize = sizeof(long) + 2 * sizeof(int); //file length, block length, last block length
 
-        //TODO: better move to another class
         /// <summary>
         /// Creates a new <see cref="byte"/> with preceding bytes that indicates the length of the array
         /// </summary>
