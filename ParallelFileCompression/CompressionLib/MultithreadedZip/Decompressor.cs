@@ -93,7 +93,7 @@ namespace CompressionLib.MultithreadedZip
             {
                 var nextBlockNumber = 0;
 
-                while (true && !IsAborted)
+                while (!IsAborted)
                 {
                     var result = OutputBlocks.TryTakeAndRemove(nextBlockNumber, out var block, true);
 

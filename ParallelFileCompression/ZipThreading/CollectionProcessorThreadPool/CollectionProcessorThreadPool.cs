@@ -24,8 +24,6 @@ namespace ZipThreading.CollectionProcessorThreadPool
 
         private WaitHandle[] _waitHandles;
 
-        private bool _isStopped;
-
         /// <summary>
         /// Initializes a new instance of the collection processor
         /// </summary>
@@ -85,7 +83,7 @@ namespace ZipThreading.CollectionProcessorThreadPool
 
         private void DispatchWorkItem(object o)
         {
-            while (!_isStopped)
+            while (true)
             {
                 var dequeueResult = _processingQueue.TryDequeue(out var collectionItem, true);
 
